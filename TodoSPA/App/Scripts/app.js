@@ -17,12 +17,50 @@ angular.module('todoApp', ['ngRoute','AdalAngular'])
     adalProvider.init(
         {
             instance: 'https://login.microsoftonline.com/', 
-            tenant: 'Enter your tenant name here e.g. contoso.onmicrosoft.com',
-            clientId: 'Enter your client ID here e.g. e9a5a8b6-8af7-4719-9821-0deef255f68e',
+            tenant: 'roljshotmail073.onmicrosoft.com',
+            clientId: 'a3b32a3c-4af8-4da9-835d-ea9335831717',
             extraQueryParameter: 'nux=1',
-            //cacheLocation: 'localStorage', // enable this for IE, as sessionStorage does not work for localhost.
+            cacheLocation: 'localStorage', // enable this for IE, as sessionStorage does not work for localhost.
+            displayCall: function (urlNavigate) {
+                //var w = window.open(window.location.protocol + "//" + window.location.host, "_blank", "height=800,width=600");
+                var w = window.open(window.location.protocol + "//" + window.location.host);
+                w.location.href = urlNavigate;
+                //var w = window.open(urlNavigate);
+            },
+            handleCallback: function(loginStartPage) {
+                //[rolandoj] Adjustments to allow for popup-based login
+                //window.parent.location.replace(loginStartPage);
+                //window.parent.location.href = window.parent.location.protocol + "//" + window.parent.location.host + window.parent.location.pathname + "#" + loginStartPage;
+                //window.parent.location.reload(true);
+                //window.parent.document.location.reload();
+                //window.parent.postMessage("done", "*")
+                //Hack required to close a window without any prompt for IE7 & greater versions.
+                //setTimeout(function () {
+                    //window.open('', '_parent', '');
+                    window.close();
+                    //alert("closed")
+                //}, 500);
+
+            }
         },
         $httpProvider
         );
    
+  
 }]);
+
+
+window.addEventListener("message", receiveMessage, false);
+window.onunload = refreshParent;
+
+function refreshParent() {
+    try{
+        window.opener.location.reload();
+    }catch(e){}
+}
+
+function receiveMessage(event) {
+    window.location.reload(true);
+    alert("posted");
+
+}

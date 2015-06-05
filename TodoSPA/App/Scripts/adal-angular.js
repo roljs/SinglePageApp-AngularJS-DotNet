@@ -116,10 +116,17 @@ if (typeof module !== 'undefined' && module.exports) {
                                         updateDataFromCache(_adal.config.loginResource);
                                         $rootScope.userInfo = _oauthData;
                                         // redirect to login requested page
+                                        //[rolandoj] Adjustments to allow for popup-based login
                                         var loginStartPage = _adal._getItem(_adal.CONSTANTS.STORAGE.START_PAGE);
-                                        if (loginStartPage) {
-                                            $location.path(loginStartPage);
-                                        }
+                                        //if (loginStartPage) {
+                                            if (_adal.config.handleCallback && typeof _adal.config.handleCallback == 'function') {
+                                                _adal.config.handleCallback(loginStartPage);
+                                            }
+                                            else {
+                                                $location.path(loginStartPage);
+
+                                            }
+                                        //}
                                     }, 1);
                                     $rootScope.$broadcast('adal:loginSuccess');
                                 } else {
@@ -169,26 +176,26 @@ if (typeof module !== 'undefined' && module.exports) {
                         }
                     }
                 };
-                
+
                 var stateChangeHandler = function (e, nextRoute) {
-                  if (nextRoute && nextRoute.requireADLogin) {
-                      if (!_oauthData.isAuthenticated && !_adal._renewActive) {
-                      console.log('Route change event for:' + nextRoute.url);
-                      if (_adal.config && _adal.config.localLoginUrl) {
-                        $location.path(_adal.config.localLoginUrl);
-                      } else {
-                        _adal._saveItem(_adal.CONSTANTS.STORAGE.START_PAGE, nextRoute.url);
-                        console.log('Start login at:' + window.location.href);
-                        $rootScope.$broadcast('adal:loginRedirect');
-                        _adal.login();
-                      }
+                    if (nextRoute && nextRoute.requireADLogin) {
+                        if (!_oauthData.isAuthenticated && !_adal._renewActive) {
+                            console.log('Route change event for:' + nextRoute.url);
+                            if (_adal.config && _adal.config.localLoginUrl) {
+                                $location.path(_adal.config.localLoginUrl);
+                            } else {
+                                _adal._saveItem(_adal.CONSTANTS.STORAGE.START_PAGE, nextRoute.url);
+                                console.log('Start login at:' + window.location.href);
+                                $rootScope.$broadcast('adal:loginRedirect');
+                                _adal.login();
+                            }
+                        }
                     }
-                  }
                 };
 
                 // Route change event tracking to receive fragment and also auto renew tokens
                 $rootScope.$on('$routeChangeStart', routeChangeHandler);
-                
+
                 $rootScope.$on('$stateChangeStart', stateChangeHandler);
 
                 $rootScope.$on('$locationChangeStart', locationChangeHandler);
